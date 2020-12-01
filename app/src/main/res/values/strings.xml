@@ -1,0 +1,15 @@
+<resources>
+    <string name="app_name">FrontEnd Utils</string>
+    <string name="password">Password</string>
+    <string name="username">Username</string>
+    <string name="login">Login</string>
+    <string name="create_account">Create Account</string>
+    <string name="name">Name</string>
+    <string name="email">Email</string>
+    <string name="optional">Optional</string>
+    <string name="logout">Logout</string>
+    <string name="failed_login_message">Failed to log in</string>
+    <string name="no_user_message">No user found matching those credentials.</string>
+    <string name="invalid_data_message">An error occurred, reach out to the developer to get this fixed.</string>
+    <string name="server_down_message">Server is down, contact the developer.</string>
+</resources>
