@@ -10,8 +10,8 @@ android {
     defaultConfig {
         minSdkVersion(21)
         targetSdkVersion(30)
-        versionCode = 1
-        versionName = "1.0"
+        versionCode = 2
+        versionName = "1.0.1"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
@@ -38,7 +38,7 @@ android {
     }
     composeOptions {
         kotlinCompilerExtensionVersion = Versions.compose_version
-        kotlinCompilerVersion = "1.4.10"
+        kotlinCompilerVersion = Versions.kotlin_version
     }
     lintOptions {
         isAbortOnError = false
@@ -53,7 +53,7 @@ dependencies {
     implementation("com.google.android.material:material:1.2.1")
     implementation("androidx.compose.ui:ui:${Versions.compose_version}")
     implementation("androidx.compose.material:material:${Versions.compose_version}")
-    implementation("androidx.ui:ui-tooling:${Versions.compose_version}")
+    implementation("androidx.compose.ui:ui-tooling:${Versions.compose_version}")
     implementation("androidx.lifecycle:lifecycle-runtime-ktx:2.3.0-beta01")
     implementation("androidx.hilt:hilt-lifecycle-viewmodel:1.0.0-alpha02")
     implementation("com.google.dagger:hilt-android:2.28-alpha")
