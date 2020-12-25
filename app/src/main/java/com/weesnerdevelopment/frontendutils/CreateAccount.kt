@@ -1,6 +1,5 @@
 package com.weesnerdevelopment.frontendutils
 
-import androidx.annotation.StringRes
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text
@@ -14,20 +13,20 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.tooling.preview.Preview
+import kimchi.Kimchi
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 import shared.auth.HashedUser
 import shared.auth.InvalidUserException
 import shared.auth.InvalidUserReason
-
-internal data class LoginError(@StringRes var message: Int? = null, var enabled: Boolean)
+import shared.auth.User
 
 @Composable
-fun LoginLayout(
+fun CreateAccountLayout(
     auth: AuthViewModel?,
-    createUser: () -> Unit,
     other: () -> Unit,
     inputType: TextInputType = TextInputType.Normal,
     spaceMedium: Dp = 8.dp,
@@ -37,42 +36,49 @@ fun LoginLayout(
         mutableStateOf(LoginError(R.string.server_down_message, false))
     }
 
+    val (name, setName) = remember { mutableStateOf("") }
+    val (email, setEmail) = remember { mutableStateOf("") }
     val (username, setUsername) = remember { mutableStateOf("") }
     val (password, setPassword) = remember { mutableStateOf("") }
 
-    val loginPressed = remember { mutableStateOf(false) }
+    val (createAccount, setCreateAccount) = remember { mutableStateOf(false) }
     val scope = rememberCoroutineScope()
 
-    if (loginPressed.value) {
-        loginPressed.value = false
-        scope.launch {
-            auth?.login(
-                hashedUser = HashedUser(username.encode, password.encode),
-                success = {
-                    if (it != null) other()
-                    else setError(LoginError(R.string.no_user_message, true))
-                },
-                fail = {
-                    when (it) {
-                        is ServerException -> {
-                            when (it.error.message.parse<InvalidUserException>().reasonCode) {
-                                InvalidUserReason.NoUserFound.code ->
-                                    setError(LoginError(R.string.no_user_message, true))
-                                InvalidUserReason.InvalidUserInfo.code ->
-                                    setError(LoginError(R.string.invalid_data_message, true))
-                                else ->
-                                    setError(LoginError(R.string.failed_login_message, true))
-                            }
-                        }
-                        else -> setError(LoginError(R.string.server_down_message, true))
-                    }
-                }
-            )
-        }
-    }
+    if (createAccount) createAccountLogic(
+        scope,
+        auth,
+        User(
+            name = name,
+            email = email,
+            username = username.encode,
+            password = password.encode
+        ),
+        other,
+        setError
+    )
 
     Box(Modifier.fillMaxSize().padding(spaceBetween)) {
         Column(Modifier.fillMaxWidth().align(Alignment.Center)) {
+            TextInput(
+                label = R.string.name,
+                oldValue = name,
+                modifier = Modifier.fillMaxWidth().padding(bottom = spaceBetween),
+                textInputType = inputType
+            ) {
+                setError(LoginError(enabled = false))
+                setName(it)
+            }
+
+            TextInput(
+                label = R.string.email,
+                oldValue = email,
+                modifier = Modifier.fillMaxWidth().padding(bottom = spaceBetween),
+                textInputType = inputType
+            ) {
+                setError(LoginError(enabled = false))
+                setEmail(it)
+            }
+
             TextInput(
                 label = R.string.username,
                 oldValue = username,
@@ -95,27 +101,19 @@ fun LoginLayout(
             }
 
             TextButton(
-                onClick = { loginPressed.value = true },
-                modifier = Modifier.fillMaxWidth().padding(bottom = spaceBetween)
-            ) {
-                Text(
-                    text = stringResource(R.string.login),
-                    modifier = Modifier.padding(vertical = spaceMedium)
-                )
-            }
-
-            TextButton(
-                onClick = createUser,
+                onClick = { setCreateAccount(true) },
                 modifier = Modifier.fillMaxWidth()
             ) {
                 Text(
-                    text = stringResource(R.string.create_account),
+                    text = stringResource(R.string.create),
                     modifier = Modifier.padding(vertical = spaceMedium)
                 )
             }
         }
 
         if (error.enabled && error.message != null) {
+            setName("")
+            setEmail("")
             setUsername("")
             setPassword("")
             Text(
@@ -128,8 +126,42 @@ fun LoginLayout(
     }
 }
 
+private fun createAccountLogic(
+    scope: CoroutineScope,
+    auth: AuthViewModel?,
+    user: User,
+    other: () -> Unit,
+    setError: (LoginError) -> Unit
+) {
+    scope.launch {
+        auth?.signUp(
+            user = user,
+            success = {
+                if (it != null) other()
+                else setError(LoginError(R.string.no_user_message, true))
+            },
+            fail = {
+                Kimchi.error("Threw signing user up", it)
+                when (it) {
+                    is ServerException -> {
+                        when (it.error.message.parse<InvalidUserException>().reasonCode) {
+                            InvalidUserReason.NoUserFound.code ->
+                                setError(LoginError(R.string.no_user_message, true))
+                            InvalidUserReason.InvalidUserInfo.code ->
+                                setError(LoginError(R.string.invalid_data_message, true))
+                            else ->
+                                setError(LoginError(R.string.failed_login_message, true))
+                        }
+                    }
+                    else -> setError(LoginError(R.string.server_down_message, true))
+                }
+            }
+        )
+    }
+}
+
 @Preview(showBackground = true)
 @Composable
-private fun previewLoginLayout() {
-    LoginLayout(null, {}, {})
+private fun previewCreateAccountLayout() {
+    CreateAccountLayout(null, {})
 }

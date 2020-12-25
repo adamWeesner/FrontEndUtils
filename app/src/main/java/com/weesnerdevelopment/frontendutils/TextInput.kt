@@ -6,6 +6,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.MaterialTheme
+import androidx.compose.material.OutlinedTextField
 import androidx.compose.material.Text
 import androidx.compose.material.TextField
 import androidx.compose.runtime.Composable
@@ -18,17 +19,20 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.text.input.VisualTransformation
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.tooling.preview.Preview
+
+enum class TextInputType { Outlined, Normal }
 
 @Composable
 fun TextInput(
+	modifier: Modifier = Modifier,
 	@StringRes label: Int? = null,
 	oldValue: String? = null,
 	@StringRes helperText: Int? = null,
 	keyboardType: KeyboardType = KeyboardType.Text,
-	modifier: Modifier = Modifier,
+	textInputType: TextInputType = TextInputType.Normal,
 	spaceMedium: Dp = 8.dp,
 	textChange: (String) -> Unit
 ) {
@@ -44,18 +48,31 @@ fun TextInput(
     }
 
     Column(modifier = modifier) {
-        TextField(
-			value = value,
-			onValueChange = {
-				setValue(it)
-				textChange(it.text)
-			},
-			visualTransformation = visualTransformation,
-			keyboardOptions = KeyboardOptions(keyboardType = keyboardType),
-			modifier = Modifier.fillMaxWidth(),
-			backgroundColor = MaterialTheme.colors.background,
-			label = { if (label != null) Text(text = stringResource(label)) }
-		)
+        when (textInputType) {
+			TextInputType.Outlined -> OutlinedTextField(
+				value = value,
+				onValueChange = {
+					setValue(it)
+					textChange(it.text)
+				},
+				visualTransformation = visualTransformation,
+				keyboardOptions = KeyboardOptions(keyboardType = keyboardType),
+				modifier = Modifier.fillMaxWidth(),
+				label = { if (label != null) Text(text = stringResource(label)) }
+			)
+			TextInputType.Normal -> TextField(
+				value = value,
+				onValueChange = {
+					setValue(it)
+					textChange(it.text)
+				},
+				visualTransformation = visualTransformation,
+				keyboardOptions = KeyboardOptions(keyboardType = keyboardType),
+				modifier = Modifier.fillMaxWidth(),
+				backgroundColor = MaterialTheme.colors.background,
+				label = { if (label != null) Text(text = stringResource(label)) }
+			)
+        }
         if (helperText != null)
             Text(
 				text = stringResource(helperText),
@@ -68,23 +85,23 @@ fun TextInput(
 @Preview(showBackground = true, widthDp = 440)
 @Composable
 private fun previewTextInputNoValue() {
-    TextInput(R.string.name) {}
+    TextInput(label = R.string.name) {}
 }
 
 @Preview(showBackground = true, widthDp = 440)
 @Composable
 private fun previewTextInput() {
-    TextInput(R.string.name, "Adam") {}
+    TextInput(label = R.string.name, oldValue = "Adam") {}
 }
 
 @Preview(showBackground = true, widthDp = 440)
 @Composable
 private fun previewTextInputHelperText() {
-    TextInput(R.string.name, "Adam", R.string.optional) {}
+    TextInput(label = R.string.name, oldValue = "Adam", helperText = R.string.optional) {}
 }
 
 @Preview(showBackground = true, widthDp = 440)
 @Composable
 private fun previewTextInputPassword() {
-    TextInput(R.string.name, "Adam", keyboardType = KeyboardType.Password) {}
+    TextInput(label = R.string.name, oldValue = "Adam", keyboardType = KeyboardType.Password) {}
 }
