@@ -1,17 +1,19 @@
 package com.weesnerdevelopment.frontendutils
 
 import android.content.SharedPreferences
-import androidx.hilt.lifecycle.ViewModelInject
 import androidx.lifecycle.ViewModel
 import com.weesnerdevelopment.frontendutils.auth.Auth
+import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.channels.BroadcastChannel
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.asFlow
 import shared.auth.HashedUser
 import shared.auth.User
 import shared.base.Response
+import javax.inject.Inject
 
-class AuthViewModel @ViewModelInject constructor(
+@HiltViewModel
+class AuthViewModel @Inject constructor(
     private val prefs: SharedPreferences,
     private val auth: Auth
 ) : ViewModel() {

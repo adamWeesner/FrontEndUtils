@@ -1,4 +1,4 @@
-package com.weesnerdevelopment.middleware
+package com.weesnerdevelopment.frontendutils
 
 import shared.base.GenericItem
 import shared.base.Response

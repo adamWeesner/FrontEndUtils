@@ -4,7 +4,7 @@ import android.os.Parcelable
 import androidx.activity.OnBackPressedCallback
 import androidx.activity.OnBackPressedDispatcher
 import androidx.compose.runtime.*
-import androidx.compose.runtime.savedinstancestate.listSaver
+import androidx.compose.runtime.saveable.listSaver
 
 class Navigator<T : Parcelable> private constructor(
     initialBackStack: List<T>,
@@ -57,12 +57,13 @@ fun backHandler(
         }
     }
 
-    onCommit(enabled) {
+    DisposableEffect(enabled) {
         backCallback.isEnabled = enabled
+        onDispose {}
     }
 
     val dispatcher = BackDispatcherAmbient.current
-    onCommit(backCallback) {
+    DisposableEffect(backCallback) {
         dispatcher.addCallback(backCallback)
         onDispose {
             backCallback.remove()
@@ -70,6 +71,6 @@ fun backHandler(
     }
 }
 
-internal val BackDispatcherAmbient = staticAmbientOf<OnBackPressedDispatcher> {
+internal val BackDispatcherAmbient = staticCompositionLocalOf<OnBackPressedDispatcher> {
     error("No back dispatcher provided")
 }
